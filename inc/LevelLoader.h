@@ -9,7 +9,7 @@ class LevelLoader
 private:
 	int h;                   // field height 
 	int w;                   // field width
-	std::vector<int> level;  // array of block in one level
+	std::vector<int> level;  // array of blocks in one level
 	std::string levelName;   // name of the level
 
 //methods
