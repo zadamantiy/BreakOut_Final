@@ -11,33 +11,34 @@ using namespace sf;
 
 bool GamePlay()
 {
-	//DEFAULTS
+	//DEFAULT VARS
 	#pragma region defaults
 
 		//screen
-		int sc_width = 640, 
-			sc_height = 480;
+		int sc_width = 640,		// screen width
+			sc_height = 480;	// screen height
 
 		//framerate
-		int framelimit = 60;
+		int framelimit = 60;	// game frame limit
 
-		//level
+		//level loading
 		std::ifstream fin("settings.txt");
 		std::string level;
 		getline(fin, level);
 
 		//game name
-		std::string name = "BreakOut";
+		std::string name = "BreakOut"; //the name of the game
 
-		//ball
-		int x = 320, y = 440;
-		float dx = 6, dy = 6;
+		int x = 320;	// ball's x coordinate
+		int y = 440;	// ball's y coordinate
+		float dx = 6;	// ball's x-axis speed
+		float dy = 6;	// ball's y-axis speed
 
 		//gameplay
-		int lives = 5;
-		bool game_active = false;
-		bool flag = false;
-		bool imm = false;
+		int lives = 5;				// live counter
+		bool game_active = false;	// pause
+		bool flag = false;			// flag for space key event handling
+		bool imm = false;			// (imm)unity from collisions for the ball
 
 	#pragma endregion defaults JustDefaultValues
 
@@ -51,12 +52,12 @@ bool GamePlay()
 	rw_app.setTitle(name + ": " + current_level->getName());
 
 	Texture t_bg;       //background image
-	Texture t_ball;
-	Texture t_paddle;
-	Texture t_heart;
-	Texture t_pause;
-	Texture t_gg;
-	Texture t_block[5];
+	Texture t_ball;		//ball image
+	Texture t_paddle;	//paddle image
+	Texture t_heart;	//live image
+	Texture t_pause;	//pause message image
+	Texture t_gg;		//end game image
+	Texture t_block[5];	//block images
 
 	t_bg.loadFromFile("images/background.jpg");
 	t_ball.loadFromFile("images/ball.png");
@@ -68,7 +69,7 @@ bool GamePlay()
 	for (auto i = 0; i < 5; i++)
 		t_block[i].loadFromFile("images/block0" + std::to_string(i + 1) + ".png");
 
-	//Set sprites
+	//Setting sprites
 	Sprite sBackground(t_bg), sBall(t_ball), sPaddle(t_paddle), sPause(t_pause), sGG(t_gg);
 
 	sPaddle.setOrigin(45, 0);
@@ -134,9 +135,10 @@ bool GamePlay()
 		//move
 		if (game_active)
 		{
-			float px = x;
-			float py = y;
+			float px = x;	// ball's x coordinate on previous step
+			float py = y;	// ball's y coordinate on previous step
 
+			//Keyboard handling
 			if (Keyboard::isKeyPressed(Keyboard::Right) && sPaddle.getGlobalBounds().left + sPaddle.getGlobalBounds().width < sc_width) sPaddle.move(9, 0);
 			if (Keyboard::isKeyPressed(Keyboard::Left) && sPaddle.getGlobalBounds().left > 0) sPaddle.move(-9, 0);
 			if (Keyboard::isKeyPressed(Keyboard::Up))
@@ -145,9 +147,11 @@ bool GamePlay()
 				dx = -(rand() % 3 + 4);
 			}
 
+			//moving ball
 			x += dx;
 			y += dy;
 
+			//collision handling
 			if (!imm)
 			{
 				for (auto i = 0; i < n; i++)
@@ -188,6 +192,7 @@ bool GamePlay()
 				}
 			}
 			else imm = false;
+			if (FloatRect(x - 6, y - 6, 12, 12).intersects(sPaddle.getGlobalBounds())) dy = -(rand() % 5 + 2);
 
 			FloatRect tmp_ball = sBall.getGlobalBounds();
 
@@ -198,14 +203,17 @@ bool GamePlay()
 				dy = -dy;
 				lives--;
 
+				//Game end
 				if (lives == 0)
 				{
 					return false;
 				}
 
-				sPaddle.setPosition(320, 460);
-				x = 320, y = 440;
-
+				//default values
+				sPaddle.setPosition(sc_width / 2, 460);
+				x = sc_width / 2, y = 440;
+				
+				//pause
 				game_active = false;
 			}
 		}
@@ -231,8 +239,6 @@ bool GamePlay()
 		{
 			break;
 		}
-
-		if (FloatRect(x - 6, y - 6, 12, 12).intersects(sPaddle.getGlobalBounds())) dy = -(rand() % 5 + 2);
 
 		sBall.setPosition(x, y);
 
